@@ -30,23 +30,23 @@
 - Docker: Для контейнеризации приложения и базы данных.
 
 - API Документация
-Этот API предоставляет функциональность для управления книгами в книжном магазине.
+- Этот API предоставляет функциональность для управления книгами в книжном магазине.
 
 - Базовый URL
-http://localhost:8080
+- http://localhost:8080
 
 - Получить все книги
-URL: /books
-Метод: GET
+- URL: /books
+- Метод: GET
 
 - Создать книгу
-URL: /books
-Метод: POST
-Описание: Создать новую книгу
-{
-  "title": "New Book",
-  "description": "A detailed description of the new book",
-  "price": 15.99,
-  "stock": 20
-}
+- URL: /books
+- Метод: POST
+- Описание: Создать новую книгу
+- {
+  - "title": "New Book",
+  - "description": "A detailed description of the new book",
+  - "price": 15.99,
+ -  "stock": 20
+- }
 

@@ -15,4 +15,5 @@ func SetupRoutes(router *gin.Engine, bookService services.BookService) {
 		bookRoutes.PUT("/:id", delivery.UpdateBook(bookService))
 		bookRoutes.DELETE("/:id", delivery.DeleteBook(bookService))
 	}
+
 }

@@ -67,7 +67,7 @@ internal/migration/
 
 - Пример миграционного файла
 ```go
-0002_create_users_table.up.sql
+-- 0002_create_users_table.up.sql
 CREATE TABLE users (
 id SERIAL PRIMARY KEY,
 username TEXT NOT NULL UNIQUE,
@@ -83,7 +83,7 @@ password TEXT NOT NULL
 - Примеры API-запросов
 - Аутентификация
 ```go
-POST auth/register
+-- POST auth/register
 Content-Type: application/json
 
 {
@@ -94,7 +94,7 @@ Content-Type: application/json
 
 - Логин
 ```go
-POST auth/login
+-- POST auth/login
 Content-Type: application/json
 
 {
@@ -105,7 +105,7 @@ Content-Type: application/json
 
 - Получить текущего пользователя
 ```go
-GET /me
+-- GET /me
 Authorization: Bearer <ваш_jwt_token>
 ```
 

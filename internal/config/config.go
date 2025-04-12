@@ -12,6 +12,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
+var DB *gorm.DB
+
 func SetupDatabaseConnection() (*gorm.DB, error) {
 	host := "db"
 	user := "bookuser"
@@ -51,5 +53,6 @@ func SetupDatabaseConnection() (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to the database: %w", err)
 	}
 
-	return gormDB, nil
+	DB = gormDB
+	return DB, nil
 }

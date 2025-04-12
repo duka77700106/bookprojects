@@ -6,37 +6,33 @@ import (
 	"time"
 )
 
-var jwtKey = []byte("your_secret_key")
-
-type Claims struct {
-	UserID uint
-	jwt.RegisteredClaims
-}
+var jwtKey = []byte("secret-key")
 
 func GenerateJWT(userID uint) (string, error) {
-	expirationTime := time.Now().Add(24 * time.Hour)
-
-	claims := &Claims{
-		UserID: userID,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expirationTime),
-		},
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(time.Hour * 72).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
 	return token.SignedString(jwtKey)
 }
 
-func ValidateJWT(tokenStr string) (*Claims, error) {
-	claims := &Claims{}
-
-	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+func ParseToken(tokenStr string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
 		return jwtKey, nil
 	})
 
 	if err != nil || !token.Valid {
 		return nil, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid claims")
 	}
 
 	return claims, nil

@@ -29,24 +29,85 @@
 - PostgreSQL: Реляционная база данных.
 - Docker: Для контейнеризации приложения и базы данных.
 
-- API Документация
-- Этот API предоставляет функциональность для управления книгами в книжном магазине.
 
-- Базовый URL
-- http://localhost:8080
+Этот API предоставляет функциональность для управления книгами в книжном магазине.
 
-- Получить все книги
-- URL: /books
-- Метод: GET
 
-- Создать книгу
+```go
+Базовый URL
+http://localhost:8080
+```
+
+```go
+Получить все книги
+URL: /books
+Метод: GET
+```
+
+```go
+Создать книгу
 - URL: /books
 - Метод: POST
 - Описание: Создать новую книгу
 - {
-  - "title": "New Book",
-  - "description": "A detailed description of the new book",
-  - "price": 15.99,
- -  "stock": 20
+- "title": "New Book",
+- "description": "A detailed description of the new book",
+- "price": 15.99,
+-  "stock": 20
 - }
+
+```
+
+
+
+
+**4. Миграции (Создание таблиц)**
+
+- Все миграционные SQL-файлы находятся в папке:
+internal/migration/
+
+- Пример миграционного файла
+```go
+0002_create_users_table.up.sql
+CREATE TABLE users (
+id SERIAL PRIMARY KEY,
+username TEXT NOT NULL UNIQUE,
+password TEXT NOT NULL
+);
+```
+
+
+
+
+**5. Authentication and Authorization (Middleware)**
+
+- Примеры API-запросов
+- Аутентификация
+```go
+POST auth/register
+Content-Type: application/json
+
+{
+"username": "admin",
+"password": "admin123"
+}
+```
+
+- Логин
+```go
+POST auth/login
+Content-Type: application/json
+
+{
+"username": "admin",
+"password": "admin123"
+}
+```
+
+- Получить текущего пользователя
+```go
+GET /me
+Authorization: Bearer <ваш_jwt_token>
+```
+
 

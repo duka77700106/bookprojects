@@ -2,6 +2,7 @@ package routers
 
 import (
 	"bookProject/internal/delivery"
+	"bookProject/internal/middleware"
 	"bookProject/internal/services"
 	"github.com/gin-gonic/gin"
 )
@@ -16,4 +17,10 @@ func SetupRoutes(router *gin.Engine, bookService services.BookService) {
 		bookRoutes.DELETE("/:id", delivery.DeleteBook(bookService))
 	}
 
+	authRoutes := router.Group("/auth")
+	{
+		authRoutes.POST("/login", delivery.Login)
+		authRoutes.POST("/register", delivery.Register)
+		authRoutes.GET("/me", middleware.AuthMiddleware(), delivery.Me)
+	}
 }

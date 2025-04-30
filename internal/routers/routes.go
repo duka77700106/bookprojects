@@ -7,20 +7,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine, bookService services.BookService) {
-	bookRoutes := router.Group("/books")
-	{
-		bookRoutes.GET("/", delivery.GetAllBooks(bookService))
-		bookRoutes.GET("/:id", delivery.GetBookByID(bookService))
-		bookRoutes.POST("/", delivery.CreateBook(bookService))
-		bookRoutes.PUT("/:id", delivery.UpdateBook(bookService))
-		bookRoutes.DELETE("/:id", delivery.DeleteBook(bookService))
-	}
+func SetupRoutes(r *gin.Engine, bookService services.BookService) {
+	r.POST("/auth/register", delivery.Register)
+	r.POST("/auth/login", delivery.Login)
 
-	authRoutes := router.Group("/auth")
+	auth := r.Group("/")
+	auth.Use(middleware.AuthMiddleware())
 	{
-		authRoutes.POST("/login", delivery.Login)
-		authRoutes.POST("/register", delivery.Register)
-		authRoutes.GET("/me", middleware.AuthMiddleware(), delivery.Me)
+		auth.GET("/books", delivery.GetAllBooks(bookService))
+		auth.GET("/books/:id", delivery.GetBookByID(bookService))
+
+		admin := auth.Group("/")
+		admin.Use(middleware.RequireRole("admin"))
+		{
+			admin.POST("/books", delivery.CreateBook(bookService))
+			admin.PUT("/books/:id", delivery.UpdateBook(bookService))
+			admin.DELETE("/books/:id", delivery.DeleteBook(bookService))
+		}
+
+		auth.GET("/auth/me", delivery.Me)
 	}
 }

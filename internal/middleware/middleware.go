@@ -27,6 +27,38 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("userID", uint(userID))
+
+		role, ok := claims["role"].(string)
+		if !ok {
+			c.AbortWithStatusJSON(401, gin.H{"error": "invalid role"})
+			return
+		}
+		c.Set("role", role)
+
 		c.Next()
+	}
+}
+
+func RequireRole(allowedRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		raw, exists := c.Get("role")
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "role not set"})
+			return
+		}
+		role, ok := raw.(string)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "invalid role type"})
+			return
+		}
+
+		for _, allowed := range allowedRoles {
+			if role == allowed {
+				c.Next()
+				return
+			}
+		}
+
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 	}
 }

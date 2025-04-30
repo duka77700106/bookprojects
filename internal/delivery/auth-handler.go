@@ -14,6 +14,12 @@ type AuthPayload struct {
 	Password string `json:"password"`
 }
 
+type RegisterPayload struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Role     string `json:"role"`
+}
+
 func Login(c *gin.Context) {
 	var credentials AuthPayload
 
@@ -33,21 +39,25 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := auth.GenerateJWT(user.ID)
+	token, err := auth.GenerateJWT(user.ID, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"token": token, "role": user.Role})
 }
 
 func Register(c *gin.Context) {
-	var input AuthPayload
-
-	if err := c.ShouldBindJSON(&input); err != nil || input.Username == "" || input.Password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration data"})
+	var input RegisterPayload
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username and password are required"})
 		return
+	}
+
+	role := "user"
+	if input.Role == "admin" {
+		role = "admin"
 	}
 
 	var exists models.User
@@ -65,6 +75,7 @@ func Register(c *gin.Context) {
 	newUser := models.User{
 		Username: input.Username,
 		Password: string(hashedPwd),
+		Role:     role,
 	}
 
 	if err := config.DB.Create(&newUser).Error; err != nil {
@@ -72,7 +83,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Registration successful"})
+	c.JSON(http.StatusCreated, gin.H{"message": "Registration successful", "role": newUser.Role})
 }
 
 func Me(c *gin.Context) {
@@ -91,5 +102,6 @@ func Me(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"id":       user.ID,
 		"username": user.Username,
+		"role":     user.Role,
 	})
 }

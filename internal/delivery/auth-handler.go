@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"strings"
+	"time"
 )
 
 type AuthPayload struct {
@@ -45,7 +47,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token, "role": user.Role})
+	err = config.RedisClient.Set(config.RedisCtx, token, user.ID, 24*time.Hour).Err()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Не удалось сохранить сессию"})
+		return
+	}
+
+	c.JSON(200, gin.H{"token": token})
 }
 
 func Register(c *gin.Context) {
@@ -104,4 +112,25 @@ func Me(c *gin.Context) {
 		"username": user.Username,
 		"role":     user.Role,
 	})
+}
+
+func LogoutHandler(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(401, gin.H{"error": "Нет токена авторизации"})
+		return
+	}
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		c.JSON(401, gin.H{"error": "Неверный формат токена"})
+		return
+	}
+	token := parts[1]
+
+	err := config.RedisClient.Del(config.RedisCtx, token).Err()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Ошибка при удалении сессии"})
+		return
+	}
+	c.JSON(200, gin.H{"message": "Вы вышли из системы"})
 }

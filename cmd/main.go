@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	config.InitRedis()
 	db, err := config.SetupDatabaseConnection()
 	if err != nil {
 		log.Fatal("Could not connect to the database:", err)
@@ -19,6 +20,7 @@ func main() {
 	bookService := services.NewBookService(bookRepo)
 	r := gin.Default()
 	routers.SetupRoutes(r, bookService)
+
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("Failed to run server:", err)
 	}

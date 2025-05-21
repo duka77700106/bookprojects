@@ -8,11 +8,11 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, bookService services.BookService) {
-	r.POST("/auth/register", delivery.Register)
-	r.POST("/auth/login", delivery.Login)
+	r.POST("/register", delivery.Register)
+	r.POST("/login", delivery.Login)
 
 	auth := r.Group("/")
-	auth.Use(middleware.AuthMiddleware())
+	auth.Use(middleware.SessionMiddleware())
 	{
 		auth.GET("/books", delivery.GetAllBooks(bookService))
 		auth.GET("/books/:id", delivery.GetBookByID(bookService))
@@ -25,6 +25,8 @@ func SetupRoutes(r *gin.Engine, bookService services.BookService) {
 			admin.DELETE("/books/:id", delivery.DeleteBook(bookService))
 		}
 
-		auth.GET("/auth/me", delivery.Me)
+		auth.GET("/me", delivery.Me)
 	}
+
+	auth.POST("/logout", delivery.LogoutHandler)
 }
